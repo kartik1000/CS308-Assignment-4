@@ -254,4 +254,85 @@ class Map(tk.Canvas):
             R = 6378000*self.ratio
             self.water_id = self.create_oval(cx - R, cy - R, cx + R, cy + R,
                         outline='black', fill='deep sky blue', tags=('water',))
+    def change_projection(self):
+        self.proj = self.controller.menu.projection_list.get()
+        self.draw_map()
+
+    def redraw_nodes(self):
+        for node_id, node in self.node_id_to_node.items():
+            cx, cy = self.to_canvas_coordinates(node.longitude, node.latitude)
+            node.x, node.y = cx, cy
+            self.coords(node_id, cx, cy)
+            self.update_node_label(node)
+            self.tag_raise(node_id)
+            self.tag_raise(node.label_id)
+
+    @update_coordinates
+    def zoomer(self, event, factor=None):
+        if not factor: 
+            factor = 1.3 if event.delta > 0 else 0.7
+        self.scale('all', event.x, event.y, factor, factor)
+        self.configure(scrollregion=self.bbox('all'))
+        self.ratio *= float(factor)
+        self.offset = (self.offset[0]*factor + event.x*(1 - factor), 
+                       self.offset[1]*factor + event.y*(1 - factor))
+        # we update all node's coordinates
+        for node_id, node in self.node_id_to_node.items():
+            node.x, node.y = self.coords(node_id)
+            self.update_node_label(node)
+
+    def update_node_label(self, node):
+        node.longitude, node.latitude = self.to_geographical_coordinates(
+                                                                node.x, node.y)
+        label = '({:.5f}, {:.5f})'.format(node.longitude, node.latitude)
+        self.coords(node.label_id, node.x - 5, node.y + 30)
+        self.itemconfig(node.label_id, text=label)
+
+    @update_coordinates            
+    def drag_and_drop(self, event):
+        if controller.drag_and_drop:
+            self.create_object(event.x, event.y)
+            controller.drag_and_drop = False
+
+    def create_object(self, x, y):
+        # create the node's image
+        id = self.create_image(x, y,image = controller.node_image, tags = ('node',))
+        # create the node's label
+        label_id = self.create_text(x - 5, y + 30)
+        # create the node object
+        node = PSF_Object(id, label_id, x, y)
+        # update the value of its label
+        self.update_node_label(node)
+        # store the node in the (node ID -> node) dictionnary
+        self.node_id_to_node[id] = node
+
+    @update_coordinates
+    def find_closest_node(self, event):
+        self.dict_start_position.clear()
+        self.drag_item = self.find_closest(event.x, event.y)[0]
+        main_node_selected = self.node_id_to_node[self.drag_item]
+        self.start_pos_main_node = event.x, event.y
+        if main_node_selected in self.selected_nodes:
+            for sn in self.selected_nodes:
+                self.dict_start_position[sn] = [sn.x, sn.y]
+        else:
+            self.unselect_all()
+            self.dict_start_position[main_node_selected] = self.start_pos_main_node 
+            self.select_objects(main_node_selected)
+
+    def select_objects(self, *objects):
+        for obj in objects:
+            self.selected_nodes.add(obj)
+            self.itemconfig(
+                            obj.id, 
+                            image = self.controller.selected_node_image
+                            )
+
+    def unselect_objects(self, *objects):
+        for obj in objects:
+            self.selected_nodes.discard(obj)
+            self.itemconfig(
+                            obj.id, 
+                            image = self.controller.node_image
+                            ) 
 
