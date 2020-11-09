@@ -105,7 +105,7 @@ class Menu(tk.Frame):
 
         lf_projection = ttk.Labelframe(
             self, 
-            text = 'Projection management', 
+            text = '', 
             padding = (6, 6, 12, 12)
         )
         lf_projection.grid(row=1, column=0, padx=5, pady=5)
@@ -117,11 +117,32 @@ class Menu(tk.Frame):
 
         change_projection_button = ttk.Button(
             self,
-            text='Change projection',
+            text='Analyze',
             command=controller.map.change_projection,
-            width=20
+            width=22
         )
-        change_projection_button.grid(row=1, column=0, pady=5, in_=lf_projection)
+        change_projection_button.grid(row=0, column=0, pady=5, in_=lf_projection)
+
+        from_label=ttk.Label(self,text="From Date")
+        from_label.grid(row=1, column=0, pady=5, in_=lf_projection)
+
+        from_date = ttk.Entry(
+            self,
+            width=22
+        )
+        from_date.insert(0,"DD-MM-YYYY")
+
+        from_date.grid(row=3, column=0, pady=5, in_=lf_projection)
+
+        from_label=ttk.Label(self,text="To Date")
+        from_label.grid(row=5, column=0, pady=5, in_=lf_projection)
+
+        to_date = ttk.Entry(
+            self,
+            width=22
+        )
+        to_date.grid(row=7, column=0, pady=5, in_=lf_projection)
+        to_date.insert(0,"DD-MM-YYYY")
 
         lf_map_management = ttk.Labelframe(
             self, 
