@@ -145,3 +145,113 @@ class Menu(tk.Frame):
             width=20
         )
         delete_selection.grid(row=1, column=0, pady=5, in_=lf_map_management)
+
+class PSF_Object():
+
+    type = 'node'
+
+    def __init__(self, id, label_id, x, y):
+        self.id = id
+        self.label_id = label_id
+        self.x, self.y = x, y
+        self.longitude, self.latitude = 0, 0
+
+
+class Map(tk.Canvas):
+
+    projections = {
+    'Mercator': pyproj.Proj(init="epsg:3395"),
+    'Azimuthal orthographic': pyproj.Proj('+proj=ortho +lon_0=28 +lat_0=47')
+    }
+
+    size = 10
+
+    def __init__(self, controller):
+        super().__init__(controller, bg='white', width=1300, height=800)
+        self.controller = controller
+        self.node_id_to_node = {}
+        self.drag_item = None
+        self.start_position = [None]*2
+        self.start_pos_main_node = [None]*2
+        self.dict_start_position = {}
+        self.selected_nodes = set()
+        self.filepath = None
+        self.proj = 'Mercator'
+        self.ratio, self.offset = 1, (0, 0)
+        self.bind('<MouseWheel>', self.zoomer)
+        self.bind('<Button-4>', lambda e: self.zoomer(e, 1.3))
+        self.bind('<Button-5>', lambda e: self.zoomer(e, 0.7))
+        self.bind('<ButtonPress-3>', lambda e: self.scan_mark(e.x, e.y))
+        self.bind('<B3-Motion>', lambda e: self.scan_dragto(e.x, e.y, gain=1))
+        self.bind('<Enter>', self.drag_and_drop, add='+')
+        self.bind('<ButtonPress-1>', self.start_point_select_objects, add='+')
+        self.bind('<B1-Motion>', self.rectangle_drawing)
+        self.bind('<ButtonRelease-1>', self.end_point_select_nodes, add='+')
+        self.tag_bind('node', '<Button-1>', self.find_closest_node)
+        self.tag_bind('node', '<B1-Motion>', self.node_motion)
+
+    def update_coordinates(function):
+        def wrapper(self, event, *others):
+            event.x, event.y = self.canvasx(event.x), self.canvasy(event.y)
+            function(self, event, *others)
+        return wrapper
+
+    def to_canvas_coordinates(self, longitude, latitude):
+        px, py = self.projections[self.proj](longitude, latitude)
+        return px*self.ratio + self.offset[0], -py*self.ratio + self.offset[1]
+
+    def to_geographical_coordinates(self, x, y):
+        px, py = (x - self.offset[0])/self.ratio, (self.offset[1] - y)/self.ratio
+        return self.projections[self.proj](px, py, inverse=True)
+
+    def import_map(self):
+        filepath = tk.filedialog.askopenfilenames(title='Import shapefile')
+        if not filepath: 
+            return
+        else: 
+            self.filepath ,= filepath
+        self.draw_map()
+
+    def draw_map(self):
+        if not self.filepath:
+            return
+        self.delete('land', 'water')
+        self.ratio, self.offset = 1, (0, 0)
+        self.draw_water()
+        sf = shapefile.Reader(self.filepath)       
+        polygons = sf.shapes() 
+        for polygon in polygons:
+            polygon = shapely.geometry.shape(polygon)
+            if polygon.geom_type == 'Polygon':
+                polygon = [polygon]
+            for land in polygon:
+                self.create_polygon(
+                    sum((self.to_canvas_coordinates(*c) for c in land.exterior.coords), ()),    
+                    fill = 'green3', 
+                    outline = 'black', 
+                    tags = ('land',)
+                )
+        self.redraw_nodes()
+
+    def delete_map(self):
+        self.delete('land', 'water')
+        self.filepath = None
+
+    def delete_selected_nodes(self):
+        for node in self.selected_nodes:
+            self.node_id_to_node.pop(node.id)
+            self.delete(node.id, node.label_id)
+        self.selected_nodes.clear()
+
+    def draw_water(self):
+        if self.proj == 'Mercator':
+            x0, y0 = self.to_canvas_coordinates(-180, 84)
+            x1, y1 = self.to_canvas_coordinates(180, -84)
+            self.water_id = self.create_rectangle(x1, y1, x0, y0,
+                        outline='black', fill='deep sky blue', tags=('water',))
+        else:
+            cx, cy = self.to_canvas_coordinates(28, 47)
+            R = 6378000*self.ratio
+            self.water_id = self.create_oval(cx - R, cy - R, cx + R, cy + R,
+                        outline='black', fill='deep sky blue', tags=('water',))
+
