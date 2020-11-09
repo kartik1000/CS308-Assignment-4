@@ -12,7 +12,7 @@ try:
 except ImportError:
     from tkinter import messagebox
     tk.messagebox.showinfo('Some libraries are missing', 
-                    'Pyproj, Shapefile and Shapely are required (see README)')
+                    'Pyproj, Shapefile and Shapely are required')
     sys.exit(1)
 try:
     import xlrd
@@ -31,7 +31,7 @@ class Controller(tk.Tk):
 
     def __init__(self, path_app):
         super().__init__()
-        self.title('Extended PyGISS')
+        self.title('GPS Data Analyzer')
         path_icon = abspath(join(path_app, pardir, 'images'))
         
         # generate the PSF tk images
