@@ -336,3 +336,80 @@ class Map(tk.Canvas):
                             image = self.controller.node_image
                             ) 
 
+    def unselect_all(self):
+        self.unselect_objects(*self.selected_nodes)
+
+    @update_coordinates
+    def start_point_select_objects(self, event):
+        # create the temporary line, only if there is nothing below
+        # this is to avoid drawing a rectangle when moving a node
+        below = self.find_overlapping(event.x-1, event.y-1, event.x+1, event.y+1)
+        tags_below = ''.join(''.join(self.itemcget(id, 'tags')) for id in below)
+        # if no object is below the selection process can start
+        if 'node' not in tags_below:
+            self.unselect_all()
+            self.start_position = event.x, event.y
+            self.temp_rectangle = self.create_rectangle(
+                event.x, 
+                event.y, 
+                event.x, 
+                event.y
+            )
+            self.tag_raise(self.temp_rectangle)
+
+    @update_coordinates
+    def rectangle_drawing(self, event):
+        # draw the line only if they were created in the first place
+        if self.start_position != [None]*2:
+            # update the position of the temporary lines
+            x0, y0 = self.start_position
+            self.coords(self.temp_rectangle, x0, y0, event.x, event.y)
+
+    @update_coordinates
+    def end_point_select_nodes(self, event):
+        if self.start_position != [None]*2:
+            # delete the temporary lines
+            self.delete(self.temp_rectangle)
+            # select all nodes enclosed in the rectangle
+            start_x, start_y = self.start_position
+            for obj in self.find_enclosed(start_x, start_y, event.x, event.y):
+                if obj in self.node_id_to_node:
+                    enclosed_obj = self.node_id_to_node[obj]
+                    self.select_objects(enclosed_obj)
+            self.start_position = [None]*2
+
+    @update_coordinates
+    def node_motion(self, event):
+        node = self.node_id_to_node[self.drag_item]
+        for selected_node in self.selected_nodes:
+            # the main node initial position, the main node current position, 
+            # and the other node initial position form a rectangle.
+            # we find the position of the fourth vertix.
+            x0, y0 = self.start_pos_main_node
+            x1, y1 = self.dict_start_position[selected_node]
+            selected_node.x = x1 + (event.x - x0)
+            selected_node.y = y1 + (event.y - y0)
+            # move the node itself
+            self.coords(selected_node.id, selected_node.x, selected_node.y)
+            # update the label
+            self.update_node_label(selected_node)
+
+    def import_nodes(self):
+        filepath = filedialog.askopenfilenames(filetypes = (('xls files','*.xls'),))
+        if not filepath:
+            return
+        else:
+            filepath ,= filepath
+        book = xlrd.open_workbook(filepath)
+        try:
+            sheet = book.sheet_by_index(0)
+        # if the sheet cannot be found, there's nothing to import
+        except xlrd.biffh.XLRDError:
+            warnings.warn('the excel file is empty: import failed')
+        for row_index in range(1, sheet.nrows):
+            x, y = self.to_canvas_coordinates(*sheet.row_values(row_index))
+            self.create_object(x, y)
+
+if str.__eq__(__name__, '__main__'):
+    controller = Controller(path_app)
+    controller.mainloop()
