@@ -1,3 +1,5 @@
+import requests
+import pandas as pd
 import sys
 import tkinter as tk
 import warnings
@@ -5,6 +7,7 @@ from inspect import stack
 from os.path import abspath, dirname, pardir, join
 from PIL import ImageTk
 from tkinter import ttk, filedialog
+
 try:
     import pyproj
     import shapefile
@@ -26,6 +29,187 @@ path_app = dirname(abspath(stack()[0][1]))
 
 if path_app not in sys.path:
     sys.path.append(path_app)
+
+lat=0
+lon=0
+
+def weather_analyze():
+    pd.options.display.max_columns = None
+    pd.options.display.max_rows = None
+    lat_long = "lat=" + str(lat)+ "&lon=" + str(lon)
+    coord_API_endpoint = "http://api.openweathermap.org/data/2.5/weather?"
+    join_key = "&appid=" + "7686f25ddee9d045def41fd27e2c576c"
+    units = "&units=metric"
+    current_coord_weather_url = coord_API_endpoint + lat_long + "&units=metric&&appid=9d06d9b4825f10f79591ff063769f070"
+    print(lat,lon)
+
+    json_data = requests.get(current_coord_weather_url).json()
+    print(json_data)
+
+    df_all_current_weather = pd.DataFrame()
+
+    # Create empty lists to store the JSON Data
+    current_time = []
+    city = []
+    latitude = []
+    longitude = []
+    country = []
+    timezone = []
+    sunrise = []
+    sunset = []
+    temperature = []
+    temperature_feel = []
+    temperature_min = []
+    temperature_max = []
+    pressure = []
+    humidity = []
+    main = []
+    main_description = []
+    clouds = []
+    wind_speed = []
+    wind_degree = []
+    visibility = []
+
+    # Add JSON Data to the lists
+    current_time.append(pd.Timestamp.now())
+    city.append(json_data['name'])
+    latitude.append(json_data['coord']['lat'])
+    longitude.append(json_data['coord']['lon'])
+    country.append(json_data['sys']['country'])
+    if json_data['timezone'] >0 :
+        timezone.append(("+" + str((json_data['timezone'])/3600)))
+    else:
+        timezone.append(((json_data['timezone'])/3600))
+    sunrise.append(json_data['sys']['sunrise'])
+    sunset.append(json_data['sys']['sunset'])
+    temperature.append(json_data['main']['temp'])
+    temperature_feel.append(json_data['main']['feels_like'])
+    temperature_min.append(json_data['main']['temp_min'])
+    temperature_max.append(json_data['main']['temp_max'])
+    pressure.append(json_data['main']['pressure'])
+    humidity.append(json_data['main']['humidity'])
+    main.append(json_data['weather'][0]['main'])
+    main_description.append(json_data['weather'][0]['description'])
+    clouds.append(json_data['clouds']['all'])
+    wind_speed.append(json_data['wind']['speed'])
+    wind_degree.append(json_data['wind']['deg'])
+    visibility.append(json_data['visibility'])
+
+    # Write Lists to DataFrame
+    df_all_current_weather['current_time'] = current_time
+    # df_all_current_weather['own_city_id'] = own_city_id
+    df_all_current_weather['city'] = city
+    df_all_current_weather['latitude'] = latitude
+    df_all_current_weather['longitude'] = longitude
+    df_all_current_weather['country'] = country
+    df_all_current_weather['timezone'] = timezone
+    df_all_current_weather['sunrise'] = sunrise
+    df_all_current_weather['sunset'] = sunset
+    df_all_current_weather['temperature'] = temperature
+    df_all_current_weather['temperature_feel'] = temperature_feel
+    df_all_current_weather['temperature_min'] = temperature_min
+    df_all_current_weather['temperature_max'] = temperature_max
+    df_all_current_weather['pressure'] = pressure
+    df_all_current_weather['humidity'] = humidity
+    df_all_current_weather['main'] = main
+    df_all_current_weather['main_description'] = main_description
+    df_all_current_weather['clouds'] = clouds
+    df_all_current_weather['wind_speed'] = wind_speed
+    df_all_current_weather['wind_degree'] = wind_degree
+    df_all_current_weather['visibility'] = visibility
+
+    root = tk.Tk()
+    root.title("Weather Module")
+    root.configure(background = "light green")
+    headlabel = tk.Label(root, text = "Weather Module", fg = 'black', bg = 'red')
+    
+    time_label = tk.Label(root, text = "Date/Time - ", fg = 'black', bg = 'light green')
+    time_label.grid(row = 0, column = 0)
+    time_field = tk.Entry(root,width=100)
+    time_field.grid(row = 0 , column = 1)
+    time_field.insert(500, str(current_time)[12:-13])
+    
+    time_label = tk.Label(root, text = "City - ", fg = 'black', bg = 'light green')
+    time_label.grid(row = 1, column = 0)
+    time_field = tk.Entry(root,width=100)
+    time_field.grid(row = 1 , column = 1)
+    time_field.insert(500, str(city)[2:-2])
+    
+    time_label = tk.Label(root, text = "Latitude - ", fg = 'black', bg = 'light green')
+    time_label.grid(row = 2, column = 0)
+    time_field = tk.Entry(root,width=100)
+    time_field.grid(row = 2 , column = 1)
+    time_field.insert(500, str(latitude)[1:-1]+"°")
+    
+    time_label = tk.Label(root, text = "Longitude - ", fg = 'black', bg = 'light green')
+    time_label.grid(row = 3, column = 0)
+    time_field = tk.Entry(root,width=100)
+    time_field.grid(row = 3, column = 1)
+    time_field.insert(500, str(longitude)[1:-1]+"°")
+    
+    time_label = tk.Label(root, text = "Country- ", fg = 'black', bg = 'light green')
+    time_label.grid(row = 4, column = 0)
+    time_field = tk.Entry(root,width=100)
+    time_field.grid(row = 4 , column = 1)
+    time_field.insert(500, str(country)[2:-2])
+    
+    time_label = tk.Label(root, text = "TimeZone - ", fg = 'black', bg = 'light green')
+    time_label.grid(row = 5, column = 0)
+    time_field = tk.Entry(root,width=100)
+    time_field.grid(row = 5 , column = 1)
+    time_field.insert(500, "UTC "+str(timezone)[2:-2])
+    
+    time_label = tk.Label(root, text = "Temperature - ", fg = 'black', bg = 'light green')
+    time_label.grid(row = 6, column = 0)
+    time_field = tk.Entry(root,width=100)
+    time_field.grid(row = 6 , column = 1)
+    time_field.insert(500, str(temperature)[1:-1]+" °Celcius")
+    
+    time_label = tk.Label(root, text = "Maximum Temperature - ", fg = 'black', bg = 'light green')
+    time_label.grid(row = 7, column = 0)
+    time_field = tk.Entry(root,width=100)
+    time_field.grid(row = 7 , column = 1)
+    time_field.insert(500, str(temperature_max)[1:-1]+" °Celcius")
+    
+    time_label = tk.Label(root, text = "Minimum Temperature - ", fg = 'black', bg = 'light green')
+    time_label.grid(row = 8, column = 0)
+    time_field = tk.Entry(root,width=100)
+    time_field.grid(row = 8 , column = 1)
+    time_field.insert(500, str(temperature_min)[1:-1]+" °Celcius")
+    
+    time_label = tk.Label(root, text = "Pressure - ", fg = 'black', bg = 'light green')
+    time_label.grid(row = 9, column = 0)
+    time_field = tk.Entry(root,width=100)
+    time_field.grid(row = 9 , column = 1)
+    time_field.insert(500, str(pressure)[1:-1]+" millibar")
+    
+    time_label = tk.Label(root, text = "Humidity - ", fg = 'black', bg = 'light green')
+    time_label.grid(row = 10, column = 0)
+    time_field = tk.Entry(root,width=100)
+    time_field.grid(row = 10 , column = 1)
+    time_field.insert(500, str(humidity)[1:-1]+"%")
+    
+    time_label = tk.Label(root, text = "Wind Speed - ", fg = 'black', bg = 'light green')
+    time_label.grid(row = 11, column = 0)
+    time_field = tk.Entry(root,width=100)
+    time_field.grid(row = 11 , column = 1)
+    time_field.insert(500, str(wind_speed)[1:-1]+"mph")
+    
+    time_label = tk.Label(root, text = "Wind Degree - ", fg = 'black', bg = 'light green')
+    time_label.grid(row = 12, column = 0)
+    time_field = tk.Entry(root,width=100)
+    time_field.grid(row = 12 , column = 1)
+    time_field.insert(500, str(wind_degree)[1:-1]+"°")
+    
+    time_label = tk.Label(root, text = "Visibility - ", fg = 'black', bg = 'light green')
+    time_label.grid(row = 13, column = 0)
+    time_field = tk.Entry(root,width=100)
+    time_field.grid(row = 13 , column = 1)
+    time_field.insert(500, str(visibility)[1:-1]+" m") 
+    root.mainloop()
+    
+    print(df_all_current_weather.head())
+
 
 class Controller(tk.Tk):
 
@@ -118,7 +302,7 @@ class Menu(tk.Frame):
         change_projection_button = ttk.Button(
             self,
             text='Analyze',
-            command=controller.map.change_projection,
+            command=weather_analyze,
             width=22
         )
         change_projection_button.grid(row=0, column=0, pady=5, in_=lf_projection)
@@ -222,7 +406,10 @@ class Map(tk.Canvas):
         return px*self.ratio + self.offset[0], -py*self.ratio + self.offset[1]
 
     def to_geographical_coordinates(self, x, y):
+        global lon
+        global lat
         px, py = (x - self.offset[0])/self.ratio, (self.offset[1] - y)/self.ratio
+        lon,lat=list(self.projections[self.proj](px, py, inverse=True))
         return self.projections[self.proj](px, py, inverse=True)
 
     def import_map(self):
@@ -275,6 +462,7 @@ class Map(tk.Canvas):
             R = 6378000*self.ratio
             self.water_id = self.create_oval(cx - R, cy - R, cx + R, cy + R,
                         outline='black', fill='deep sky blue', tags=('water',))
+
     def change_projection(self):
         self.proj = self.controller.menu.projection_list.get()
         self.draw_map()
@@ -355,7 +543,7 @@ class Map(tk.Canvas):
             self.itemconfig(
                             obj.id, 
                             image = self.controller.node_image
-                            ) 
+                            )
 
     def unselect_all(self):
         self.unselect_objects(*self.selected_nodes)
