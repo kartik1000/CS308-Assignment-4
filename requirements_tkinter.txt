@@ -3,3 +3,13 @@ shapely
 pyproj
 pillow
 xlrd
+requests
+pandas
+sys
+tkinter
+warnings
+inspect
+os
+PIL
+matplolib
+landsatxplore.api
