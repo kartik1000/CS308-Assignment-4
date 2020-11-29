@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><metadata>
+    <idinfo>
+        <citation>
+            <citeinfo>
+                <title>Demography</title>
+                <onlink>https://gisportal.niit-tech.in/esriportal/rest/services/INDIA/DemographicData/MapServer</onlink>
+            </citeinfo>
+        </citation>
+        <descript>
+            <abstract>The Census 2011 is the 15th National census survey conducted by the Census Organization of India. Mr. C. Chandramouli is the Commissioner &amp;amp; Registrar General of the Indian 2011 Census. The 2011 Indian National Census has been conducted in 2 phases - house listing and population. The national census survey covered all the 28 states of the country and 7 Union territories including 640 districts, 497 cities, 5767 tehsils &amp;amp; over 6 lakh villages.Census demographic data contains informations like Households, Population enumeration, Literacy, Sex ratio, Child sex ratio (0–6 age group), etc.Source links for the Data are given below:Census of India, 2011Telangana Open Data Portal</abstract>
+            <purpose>This map provides 2011 Census of India data at District level.</purpose>
+        </descript>
+        <keywords>
+            <theme>
+                <themekt>None</themekt>
+                <themekey>Demography</themekey>
+                <themekey>Demographic</themekey>
+                <themekey>India</themekey>
+                <themekey>Census</themekey>
+                <themekey>State</themekey>
+                <themekey>District</themekey>
+                <themekey>people</themekey>
+                <themekey>urban</themekey>
+                <themekey>income</themekey>
+                <themekey>demographics</themekey>
+                <themekey>spending</themekey>
+                <themekey>behaviors</themekey>
+                <themekey>population</themekey>
+                <themekey>housing</themekey>
+                <themekey>business</themekey>
+                <themekey>jobs</themekey>
+                <themekey>poverty</themekey>
+                <themekey>at risk</themekey>
+            </theme>
+        </keywords>
+        <accconst>None</accconst>
+        <useconst>The Distribution of above data is as per the policy provided by the respective data sources (Creditors).Census of India, 2011Telangana Open Data Portal</useconst>
+        <datacred>Census of India 2011,Telangana Open Data,Used HERE data Boundary as provided through AGOL.</datacred>
+    </idinfo>
+    <metainfo>
+        <metd>20170919</metd>
+        <metc>
+            <cntinfo>
+                <!--no contact person or organization name available-->
+            </cntinfo>
+        </metc>
+        <metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
+        <metstdv>FGDC-STD-001-1998</metstdv>
+        <mettc>local time</mettc>
+    </metainfo>
+</metadata>
