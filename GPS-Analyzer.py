@@ -7,7 +7,6 @@ from inspect import stack
 from os.path import abspath, dirname, pardir, join
 from PIL import ImageTk
 from tkinter import ttk, filedialog
-
 try:
     import pyproj
     import shapefile
@@ -350,6 +349,7 @@ class Menu(tk.Frame):
             width=20
         )
         delete_selection.grid(row=1, column=0, pady=5, in_=lf_map_management)
+
 
 class PSF_Object():
 
