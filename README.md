@@ -2,15 +2,15 @@
 
 __Teammates__
 
-Subhash Suman (B18088)
+* Subhash Suman (B18088)
 
-Vyom Goel (B18093)
+* Vyom Goel (B18093)
 
-Kartik Kathuria (B18118)
+* Kartik Kathuria (B18118)
 
-Vasu Gupta (B180149)
+* Vasu Gupta (B180149)
 
-Manav Mehta (B18175)
+* Manav Mehta (B18175)
 
 
 ### Youtube Video Link
