@@ -15,7 +15,9 @@ __Teammates__
 
 ### Youtube Video Link
 
-https://youtu.be/g5OI593HXPM
+Release 2 - https://www.youtube.com/watch?v=g5OI593HXPM&feature=youtu.be
+Release 1 - https://www.youtube.com/watch?v=A48eOUl1wWo
+
 
 ### Documentation Link
 
